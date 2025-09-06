@@ -13,7 +13,7 @@
 - Белых Андрей (GitHub: Belandiy) — Документация + DevOps
 - Савчук Виталий (GitHub: vitek4k) — Frontend (HTML + CSS)
 - Яшков Андрей (GitHub: Lomikk) — Frontend (JS + интеграция)
-- Джураев Фазлиддин (GitHub: ---) — Тестирование + UI/UX 
+- Джураев Фазлиддин (GitHub: Fazliddin4999) — Тестирование + UI/UX 
 
 ---
 
