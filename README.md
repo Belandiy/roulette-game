@@ -12,7 +12,7 @@
 - Баранов Александр (GitHub: Blond-beard-catboy) — Backend (Python + БД)  
 - Белых Андрей (GitHub: Belandiy) — Документация + DevOps
 - Савчук Виталий (GitHub: vitek4k) — Frontend (HTML + CSS)
-- Яшков Андрей (GitHub: ---) — Frontend (JS + интеграция)
+- Яшков Андрей (GitHub: Lomikk) — Frontend (JS + интеграция)
 
 ---
 
