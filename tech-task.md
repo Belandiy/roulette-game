@@ -41,6 +41,7 @@ roulette/
   - rules.html
 - README.md
 - tech-task.md
+- requirements.txt
 
 ---
 
