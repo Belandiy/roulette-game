@@ -13,7 +13,6 @@
 - Сохранение результата игрока в базе данных.  
 - Отображение турнирной таблицы (ТОП-10 игроков).  
 - Простое оформление интерфейса (HTML + CSS).  
-- Возможность запуска в Docker.  
 - Страница «Правила игры».  
 - Минимальная регистрация (никнейм).  
 
@@ -24,24 +23,26 @@
 - **База данных:** SQLite (таблица `players`: `id`, `nickname`, `score`, `combinations`).  
 - **Frontend:** HTML, CSS (стили и адаптивность), JS (логика рулетки).  
 - **Шаблонизатор:** Jinja2 (во Flask).  
-- **Docker:** для упаковки и запуска проекта.  
 
 ---
 
 ## 4. Структура проекта
 roulette/
-- app.py # Flask-приложение
-- database.db # SQLite-база
-- static/ # CSS, JS, картинки
-  - style.css
-  - script.js
-- images/
-- templates/ # HTML-шаблоны
-  - index.html
-  - rules.html
-- README.md
-- tech-task.md
-- requirements.txt
+├── app.py
+├── db.py
+├── schema.sql
+├── scoring.py
+├── requirements.txt
+│
+├── static/
+│   ├── app.js
+│   └── styles.css
+│
+└── templates/
+    ├── base.html
+    ├── index.html
+    ├── rules.html
+    └── _leaderboard.html
 
 ---
 
@@ -152,5 +153,4 @@ roulette/
 - Flask  
 - SQLite  
 - HTML, CSS, JavaScript  
-- Docker  
 - GitHub (репозиторий, Issues, Milestones, Pull Requests)
