@@ -27,6 +27,7 @@
 ---
 
 ## 4. Структура проекта
+```
 roulette/
 ├── app.py
 ├── db.py
@@ -43,6 +44,7 @@ roulette/
     ├── index.html
     ├── rules.html
     └── _leaderboard.html
+```
 
 ---
 
