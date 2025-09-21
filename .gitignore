@@ -87,3 +87,10 @@ ipython_config.py
 *-journal
 *-wal
 *-shm
+
+# --- Notepad++ backups ---
+nppBackup/
+backup/
+*.bak
+*.back
+*~.txt
