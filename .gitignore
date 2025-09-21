@@ -1,0 +1,89 @@
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- Python bytecode/cache ---
+__pycache__/
+*.py[cod]
+*$py.class
+.ruff_cache/
+.mypy_cache/
+.pytype/
+.pyre/
+cython_debug/
+
+# --- Envs & secrets ---
+.venv/
+venv/
+env/
+ENV/
+.env
+.envrc
+
+# --- Packaging / build artifacts ---
+build/
+dist/
+.eggs/
+*.egg-info/
+wheels/
+sdist/
+*.egg
+MANIFEST
+
+# --- Logs ---
+*.log
+pip-log.txt
+pip-delete-this-directory.txt
+
+# --- Tests / coverage ---
+.tox/
+.nox/
+.pytest_cache/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py.cover
+.hypothesis/
+htmlcov/
+cover/
+
+# --- Docs ---
+docs/_build/
+
+# --- Framework caches ---
+instance/
+.webassets-cache
+
+# --- Jupyter/IPython ---
+.ipynb_checkpoints
+profile_default/
+ipython_config.py
+
+# --- Editors / IDEs ---
+# VS Code
+.vscode/
+# JetBrains (PyCharm, etc.)
+.idea/
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln
+*.vcxproj*
+*.csproj*
+
+# --- Cursor editor ---
+.cursorignore
+.cursorindexingignore
+
+# --- Databases (local) ---
+*.db
+*.sqlite
+*.sqlite3
+*-journal
+*-wal
+*-shm
