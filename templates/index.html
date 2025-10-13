@@ -1,14 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Hello World</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <h1>Hello World from Flask!</h1>
-    <button onclick="fetchMessage()">Get API Message</button>
-    <p id="apiMessage"></p>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Играть — Roulette MVP{% endblock %}
+
+{% block content %}
+  <h1>Roulette (MVP)</h1>
+
+  <label>Nickname:
+    <input id="nick" type="text" placeholder="Player1" />
+  </label>
+
+  <button id="spin-btn">Крутить</button>
+
+  <section id="result" style="margin-top:16px;">
+    <div><strong>Результат:</strong> <span id="result-values">—</span></div>
+    <div><strong>Очки:</strong> <span id="result-score">—</span></div>
+    <div><strong>Комбо:</strong> <span id="result-combo">—</span></div>
+  </section>
+{% endblock %}
