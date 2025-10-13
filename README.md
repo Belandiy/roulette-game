@@ -71,8 +71,9 @@ curl -s -X POST http://127.0.0.1:5000/api/spin \
   -H "Content-Type: application/json" \
   -d '{"nickname":"Player1"}'
 ```
-```bash
+
 JavaScript (fetch)
+```bash
 async function spin(nickname = 'anonymous') {
   const res = await fetch('/api/spin', {
     method: 'POST',
