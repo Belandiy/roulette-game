@@ -72,32 +72,6 @@ curl -s -X POST http://127.0.0.1:5000/api/spin \
   -d '{"nickname":"Player1"}'
 ```
 
-JavaScript (fetch)
-```bash
-async function spin(nickname = 'anonymous') {
-  const res = await fetch('/api/spin', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ nickname })
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || 'Server error');
-  }
-  return await res.json();
-}
-
-// пример использования
-spin('Player1').then(data => console.log(data)).catch(e => console.error(e));
-```
-Python (requests)
-```bash
-import requests
-
-r = requests.post('http://127.0.0.1:5000/api/spin', json={"nickname":"Player1"})
-print(r.status_code, r.json())
-```
-
 ---
 
 ## 👥 Состав команды
