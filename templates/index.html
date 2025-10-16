@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Играть — Roulette MVP{% endblock %}
+
+{% block content %}
+  <h1>Roulette (MVP)</h1>
+
+  <label>Nickname:
+    <input id="nick" type="text" placeholder="Player1" />
+  </label>
+
+  <button id="spin-btn">Крутить</button>
+
+  <section id="result" style="margin-top:16px;">
+    <div><strong>Результат:</strong> <span id="result-values">—</span></div>
+    <div><strong>Очки:</strong> <span id="result-score">—</span></div>
+    <div><strong>Комбо:</strong> <span id="result-combo">—</span></div>
+  </section>
+{% endblock %}

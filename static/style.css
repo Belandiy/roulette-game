@@ -1,0 +1,22 @@
+body {
+    font-family: Arial, sans-serif; 
+    padding: 20px; 
+    line-height: 1.4;
+}
+nav {
+    margin-bottom: 12px;
+}
+input {
+    margin: 0 8px 0 4px;
+}
+button {
+    margin-left: 8px;
+    padding: 6px 12px;
+}
+#result {
+    margin-top: 12px;
+    background:#f7f7f7;
+    padding:8px;
+    border-radius:6px;
+    width:320px;
+}
