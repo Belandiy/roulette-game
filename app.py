@@ -5,20 +5,35 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
+    """Главная страница приложения.
+    Возвращает HTML шаблон с игровым интерфейсом."""
     return render_template("index.html")
 
 @app.route("/rules")
 def rules():
+    """Страница с правилами игры.
+    Возвращает HTML шаблон с описанием правил."""
     return render_template("rules.html")
 
 @app.route("/api/spin", methods=["POST"])
 def api_spin():
-    """
-    Request JSON:
-      { "nickname": "Player1" }  # без поля bet
-    Response JSON:
-      { "nickname":"Player1", "result":[1,2,3], "score":0, "combo":"none" }
-    """
+    """API endpoint для выполнения вращения в игре.
+    
+    Принимает JSON с ником пользователя:
+      { "nickname": "Player1" }
+    
+    Возвращает JSON с результатом вращения:
+      { 
+        "nickname": "Player1", 
+        "result": [1,2,3], 
+        "score": 0, 
+        "combo": "none" 
+      }
+    
+    Логика расчета очков:
+      - Три одинаковых числа: 100 очков
+      - Два одинаковых числа: 20 очков
+      - Все разные: 0 очков"""
     data = request.get_json(silent=True) or {}
     nickname = data.get("nickname", "anonymous")
 
