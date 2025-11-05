@@ -1,19 +1,41 @@
 {% extends "base.html" %}
-
-{% block title %}Играть — Roulette MVP{% endblock %}
-
 {% block content %}
-  <h1>Roulette (MVP)</h1>
+<div class="row">
+  <div class="card" style="flex:2 1 380px;">
+    <h2>Игра</h2>
 
-  <label>Nickname:
-    <input id="nick" type="text" placeholder="Player1" />
-  </label>
+    <!-- 
+      Верстальщик добавил простую форма для ника заглушка.
+    -->
+    <div style="margin:12px 0;">
+      <label>Никнейм</label><br>
+      <input type="text" name="nickname" placeholder="Player123">
+      <button class="btn" type="submit">Сохранить</button>
+    </div>
 
-  <button id="spin-btn">Крутить</button>
+    <!-- Блок с "барабанами" -->
+    <div class="reels" aria-live="polite">
+      <div class="reel-wrap"><div class="reel">🍒</div></div>
+      <div class="reel-wrap"><div class="reel">🍋</div></div>
+      <div class="reel-wrap"><div class="reel">⭐</div></div>
+    </div>
 
-  <section id="result" style="margin-top:16px;">
-    <div><strong>Результат:</strong> <span id="result-values">—</span></div>
-    <div><strong>Очки:</strong> <span id="result-score">—</span></div>
-    <div><strong>Комбо:</strong> <span id="result-combo">—</span></div>
-  </section>
+    <!-- Кнопка и поля для вывода результата с нужными ID -->
+    <button id="spin-btn" class="btn">Крутить</button>
+    <div class="status" id="status"></div>
+
+    <p>Очки за спин: <strong id="points">0</strong></p>
+    <p>Ваш лучший результат: <strong id="best">0</strong></p>
+  </div>
+
+  <div class="card" style="flex:1 1 260px;">
+    <h2>ТОП-10</h2>
+    <!-- Таблица для лидерборда с необходимым ID для JS -->
+    <table class="table">
+      <thead><tr><th>#</th><th>Ник</th><th>Очки</th></tr></thead>
+      <tbody id="leaderboard-body">
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}
