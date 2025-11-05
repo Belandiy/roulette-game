@@ -22,11 +22,20 @@ def api_spin():
     """
     data = request.get_json(silent=True) or {}
     nickname = data.get("nickname", "anonymous")
-    
-    # Заглушка - всегда возвращаем один результат
-    result = [7, 7, 7]
-    combo = "three_of_kind"
-    score = 100
+
+    # Генерация результата (серверная сторона — честно)
+    result = [random.randint(0, 9) for _ in range(3)]
+
+    # Простая логика очков без ставки
+    if result[0] == result[1] == result[2]:
+        combo = "three_of_kind"
+        score = 100
+    elif len(set(result)) == 2:
+        combo = "pair"
+        score = 20
+    else:
+        combo = "none"
+        score = 0
 
     return jsonify({
         "nickname": nickname,
