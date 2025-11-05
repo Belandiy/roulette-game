@@ -15,7 +15,10 @@ def rules():
 @app.route("/api/spin", methods=["POST"])
 def api_spin():
     """
-    Заглушка для спина - возвращает фиксированные значения
+    Request JSON:
+      { "nickname": "Player1" }  # без поля bet
+    Response JSON:
+      { "nickname":"Player1", "result":[1,2,3], "score":0, "combo":"none" }
     """
     data = request.get_json(silent=True) or {}
     nickname = data.get("nickname", "anonymous")
