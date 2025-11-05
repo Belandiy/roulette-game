@@ -1,3 +1,4 @@
+from scoring import spin_reels, score, get_symbol_displa
 from flask import Flask, render_template, request, jsonify
 import random
 
@@ -22,6 +23,10 @@ def api_spin():
     data = request.get_json(silent=True) or {}
     nickname = data.get("nickname", "anonymous")
 
+    # Реальная логика вращения
+    reels_result = spin_reels()
+    points_earned = score(reels_result)
+    
     # Генерация результата (серверная сторона — честно)
     result = [random.randint(0, 9) for _ in range(3)]
 
@@ -35,13 +40,22 @@ def api_spin():
     else:
         combo = "none"
         score = 0
-
+        
+    # Конвертируем символы в emoji для фронтенда
+    reels_display = [get_symbol_display(symbol) for symbol in reels_result]
+    
     return jsonify({
         "nickname": nickname,
         "result": result,
         "score": score,
-        "combo": combo
-    }), 200
+        "combo": combo,
+        'reels': reels_display,
+        'points': points_earned,
+        'best_points': 0,  # TODO: Реализовать логику лучшего результата
+        'message': 'Вы выиграли очки!' if points_earned > 0 else 'Попробуйте еще раз!'
+    })
+
+ 
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=True)
