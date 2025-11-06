@@ -1,24 +1,21 @@
 <!doctype html>
 <html lang="ru">
+  <!-- Основа" -->
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>{% block title %}Roulette MVP{% endblock %}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="utf-8">
+  <title>Рулетка</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet">
 </head>
 <body>
-  <header>
-    <nav>
-      <a href="{{ url_for('home') }}">Играть</a> |
-      <a href="{{ url_for('rules') }}">Правила</a>
-    </nav>
-  </header>
-
-  <main>
+  <div class="container">
+    <div class="header">
+      <div><a href="{{ url_for('index') }}" style="color:#e6e8ee;text-decoration:none;">🎰 Рулетка</a></div>
+      <nav><a href="{{ url_for('rules') }}" class="small" style="text-decoration:none;color:#aab0d0;">Правила</a></nav>
+    </div>
     {% block content %}{% endblock %}
-  </main>
-
-  <script src="{{ url_for('static', filename='script.js') }}"></script>
-  {% block scripts %}{% endblock %}
+    <p class="small" style="margin-top:24px;">Учебное приложение.</p>
+  </div>
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
 </body>
 </html>
