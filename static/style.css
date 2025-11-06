@@ -1,22 +1,30 @@
-body {
-    font-family: Arial, sans-serif; 
-    padding: 20px; 
-    line-height: 1.4;
-}
-nav {
-    margin-bottom: 12px;
-}
-input {
-    margin: 0 8px 0 4px;
-}
-button {
-    margin-left: 8px;
-    padding: 6px 12px;
-}
-#result {
-    margin-top: 12px;
-    background:#f7f7f7;
-    padding:8px;
-    border-radius:6px;
-    width:320px;
-}
+/*Контейнер, шрифт, структура страницы*/
+
+:root { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+body { margin: 0; padding: 0; background: #0f1220; color: #e6e8ee; }
+.container { max-width: 900px; margin: 0 auto; padding: 24px; }
+.header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.card { background:#171a2b; border:1px solid #242949; border-radius:12px; padding:16px; box-shadow: 0 4px 16px rgba(0,0,0,.25); }
+.row { display:flex; gap:16px; flex-wrap:wrap; }
+
+/*Рулетка*/
+.reels { display:flex; gap:12px; justify-content:center; align-items:center; margin:16px 0; }
+.reel-wrap { width:100px; height:100px; overflow:hidden; border-radius:12px; border:2px solid #2b3058; background:#0c0f1b; display:flex; align-items:center; justify-content:center; }
+.reel { font-size: 56px; filter: drop-shadow(0 2px 2px rgba(0,0,0,.6)); }
+
+/*Кнопки*/
+.btn { padding:10px 16px; border:1px solid #3a3f73; background:#22264a; color:#e6e8ee; border-radius:10px; cursor:pointer; }
+.btn:disabled { opacity:.6; cursor:not-allowed; }
+
+/*Ввод и вывод*/
+input[type="text"] { padding:8px 10px; background:#0c0f1b; color:#e6e8ee; border:1px solid #2b3058; border-radius:8px; }
+label { font-size:14px; color:#aab0d0; }
+
+/*Таблица с результатами*/
+.table { width:100%; border-collapse: collapse; }
+.table th, .table td { padding:8px 10px; border-bottom:1px solid #242949; }
+.table th { text-align:left; color:#aab0d0; font-weight:600; }
+
+/*Статус игры*/
+.status { min-height: 20px; color:#9ad0ff; margin-top:8px; }
+.small { color:#aab0d0; font-size: 14px; }
