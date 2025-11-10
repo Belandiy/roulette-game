@@ -1,69 +1,62 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. Инициализация DOM: находим все HTML-элементы, с которыми будем работать.
+  // 1. Инициализация DOM (находим все нужные элементы по их id)
   const spinBtn = document.getElementById("spin-btn");
   const pointsEl = document.getElementById("points");
   const bestEl = document.getElementById("best");
   const statusEl = document.getElementById("status");
   const leaderboardEl = document.getElementById("leaderboard-body");
-  const reels = [...document.querySelectorAll(".reel")]; // Находим барабаны для будущего
+  const reels = [...document.querySelectorAll(".reel")];
 
-  // 2. Функция для загрузки и отображения таблицы лидеров
+  // 2. Функция для загрузки лидерборда
   async function loadLeaderboard() {
     try {
       const response = await fetch("/api/leaderboard");
-      if (!response.ok) {
-        // Если сервер ответил ошибкой, просто выходим
-        console.error("Failed to load leaderboard");
-        return;
-      }
-      const data = await response.json();
+      const data = await response.json(); // Ожидаем "голый" массив: [ {nickname: ..., best_score: ...} ]
 
-      leaderboardEl.innerHTML = ""; // Очищаем старую таблицу перед отрисовкой новой
-      data.top.forEach((row, index) => {
+      leaderboardEl.innerHTML = "";
+      // Работаем напрямую с data, так как нет ключа "top"
+      data.forEach((row, index) => {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${index + 1}</td><td>${row.nickname}</td><td>${row.best_points}</td>`;
+        // Используем ключ best_score, от бэкенда
+        tr.innerHTML = `<td>${index + 1}</td><td>${row.nickname}</td><td>${row.best_score}</td>`;
         leaderboardEl.appendChild(tr);
       });
     } catch (error) {
-      // В случае сетевой ошибки, выводим ее в консоль
-      console.error("Network error while loading leaderboard:", error);
+      console.error("Failed to load leaderboard:", error);
     }
   }
 
-  // 3. Обработчик клика на кнопку "Крутить"
+  // 3. Обработчик кнопки "Крутить"
   if (spinBtn) {
     spinBtn.addEventListener("click", async () => {
-      spinBtn.disabled = true; // Отключаем кнопку, чтобы избежать повторных нажатий
+      spinBtn.disabled = true;
       statusEl.textContent = "Крутим...";
 
       try {
         const response = await fetch("/api/spin", { method: "POST" });
-        if (!response.ok) {
-          statusEl.textContent = "Ошибка спина";
-          return;
-        }
-        
-        const data = await response.json();
+        const data = await response.json(); // Ожидаем {result: [...], score: N, combo: "..."}
 
-        // Обновляем текстовые поля. Анимации нет, как и требуется в задаче.
-        // Просто показываем результат, полученный от сервера.
+        // Обновляем DOM на основе полученных данных
+        // Отображаем числа из поля "result"
         reels.forEach((reel, index) => {
-          reel.textContent = data.reels[index];
+          reel.textContent = data.result[index];
         });
-        pointsEl.textContent = data.points;
-        bestEl.textContent = data.best_points;
-        statusEl.textContent = "Готово!";
-        
+
+        // Обновляем очки за спин из поля "score"
+        pointsEl.textContent = data.score;
+        statusEl.textContent = `Комбинация: ${data.combo}`;
+
+        // API бэкендера не возвращает поле best_points,
+        // невозможно обновить "Ваш лучший результат".
+
       } catch (error) {
-        statusEl.textContent = "Сетевая ошибка";
-        console.error("Network error during spin:", error);
+        statusEl.textContent = "Ошибка спина";
+        console.error("Spin error:", error);
       } finally {
-        // Блок finally выполнится всегда: и после успеха, и после ошибки.
-        spinBtn.disabled = false; // Включаем кнопку обратно
+        spinBtn.disabled = false;
       }
     });
   }
 
-  // 4. Первоначальная загрузка таблицы лидеров при открытии страницы
   loadLeaderboard();
 });
