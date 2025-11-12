@@ -1,7 +1,10 @@
 from flask import Flask, render_template, request, jsonify
 import random
+import db
 
 app = Flask(__name__)
+
+db.init_app(app)
 
 @app.route("/")
 def home():
@@ -44,4 +47,6 @@ def api_spin():
     }), 200
 
 if __name__ == "__main__":
+    with app.app_context(): # Инициализация БД пр старте
+        db.ensure_db()
     app.run(host="127.0.0.1", port=5000, debug=True)
