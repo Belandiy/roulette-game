@@ -130,7 +130,7 @@ roulette/
 **2) Разработчик базы данных**
 Обязанности: финальный тюнинг выборок.
 Файлы: `schema.sql`, `db.py`
-Коммиты: уточнение ORDER BY для лидерборда (`best_points DESC, MIN(created_at) ASC`), лёгкая очистка кода и проверка `ensure_db()`, CLI команда `flask init-db`.
+Коммиты: уточнение ORDER BY для лидерборда (`best_points DESC, MIN(created_at) ASC`), лёгкая очистка кода и проверка `ensure_db()`, CLI команда `flask init-db`, добавить регистрацию CLI команды в db.init_app(app).
 
 **3) Игровая логика**
 Обязанности: баланс и читабельность.
