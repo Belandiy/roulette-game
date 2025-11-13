@@ -4,7 +4,7 @@ DROP TABLE IF EXISTS users;
 -- Создаем таблицу пользователей
 CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,          -- Уникальный идентификатор
-    nickname TEXT UNIQUE NOT NULL,                 -- Никнейм пользователя (уникальное)
+    username TEXT UNIQUE NOT NULL,                 -- Никнейм пользователя (уникальное)
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Дата создания записи
 );
 
