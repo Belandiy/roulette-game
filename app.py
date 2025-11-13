@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session
 import random
 
 app = Flask(__name__)
+app.secret_key = 'dev_key_sprint_2'  # Временный ключ для сессий
 
 @app.route("/")
 def home():
@@ -42,6 +43,20 @@ def api_spin():
         "score": score,
         "combo": combo
     }), 200
+
+@app.route("/api/leaderboard")
+def api_leaderboard():
+    """
+    Заглушка для турнирной таблицы
+    """
+    # Возвращаем фиктивные данные
+    leaderboard = [
+        {"nickname": "Player1", "best_score": 100},
+        {"nickname": "Player2", "best_score": 50},
+        {"nickname": "Player3", "best_score": 20}
+    ]
+    
+    return jsonify(leaderboard), 200
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=True)
