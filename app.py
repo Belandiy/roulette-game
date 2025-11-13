@@ -1,8 +1,11 @@
 from flask import Flask, render_template, request, jsonify, session
 import random
+import db
 
 app = Flask(__name__)
 app.secret_key = 'dev_key_sprint_2'  # Временный ключ для сессий
+
+db.init_app(app)
 
 @app.route("/")
 def home():
@@ -59,4 +62,6 @@ def api_leaderboard():
     return jsonify(leaderboard), 200
 
 if __name__ == "__main__":
+    with app.app_context(): # Инициализация БД пр старте
+        db.ensure_db()
     app.run(host="127.0.0.1", port=5000, debug=True)
