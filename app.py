@@ -94,6 +94,11 @@ def api_leaderboard():
     """
     # Получаем топ-10 игроков из БД с правильной сортировкой
     leaderboard = db.get_top_players(limit=10)
+    Получить турнирную таблицу ТОП-10 игроков.
+    Сортировка: лучший результат DESC, время создания ASC.
+    """
+    # Получаем топ-10 игроков из БД с правильной сортировкой
+    leaderboard = db.get_top_players(limit=10)
     
     return jsonify(leaderboard), 200
 
