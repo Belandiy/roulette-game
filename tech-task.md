@@ -20,7 +20,7 @@
 
 ## 3. Архитектура
 - **Backend:** Python + Flask.  
-- **База данных:** SQLite (таблицы `users: id, nickname, created_at` и `scores: id, user_id, points, reels_json, created_at`).  
+- **База данных:** SQLite (таблицы `users: id, username, created_at` и `scores: id, user_id, points, reels_json, created_at`).  
 - **Frontend:** HTML, CSS (стили и адаптивность), JS (логика рулетки).  
 - **Шаблонизатор:** Jinja2 (во Flask).  
 
