@@ -60,10 +60,14 @@ def get_top_players(limit=10):
     
     Returns:
 <<<<<<< HEAD
+<<<<<<< HEAD
         Список словарей с полями: nickname, best_points, first_played
 =======
         Список словарей с полями: nickname, best_score, first_played
 >>>>>>> f216a11 (уточнение ORDER BY для лидерборда (`best_points DESC, MIN(created_at) ASC`), CLI команда `flask init-db`)
+=======
+        Список словарей с полями: username, best_score, first_played
+>>>>>>> 0ceb088 (nickname to username)
     """
     db = get_db()
     query = """
