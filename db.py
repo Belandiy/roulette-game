@@ -59,7 +59,7 @@ def get_top_players(limit=10):
         limit: максимальное количество игроков (по умолчанию 10)
     
     Returns:
-        Список словарей с полями: nickname, best_score, first_played
+        Список словарей с полями: username, best_score, first_played
     """
     db = get_db()
     query = """
