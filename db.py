@@ -59,18 +59,18 @@ def get_top_players(limit=10):
         limit: максимальное количество игроков (по умолчанию 10)
     
     Returns:
-        Список словарей с полями: username, best_score, first_played
+        Список словарей с полями: nickname, best_points, first_played
     """
     db = get_db()
     query = """
     SELECT 
-        u.username,
-        MAX(s.points) as best_score,
+        u.nickname,
+        MAX(s.points) as best_points,
         MIN(s.created_at) as first_played
     FROM users u
     LEFT JOIN scores s ON u.id = s.user_id
     GROUP BY u.id
-    ORDER BY best_score DESC, first_played ASC
+    ORDER BY best_points DESC, first_played ASC
     LIMIT ?
     """
     rows = db.execute(query, (limit,)).fetchall()
