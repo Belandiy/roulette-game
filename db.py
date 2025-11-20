@@ -61,6 +61,7 @@ def get_top_players(limit=10):
     Returns:
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         Список словарей с полями: nickname, best_points, first_played
 =======
         Список словарей с полями: nickname, best_score, first_played
@@ -68,10 +69,14 @@ def get_top_players(limit=10):
 =======
         Список словарей с полями: username, best_score, first_played
 >>>>>>> 0ceb088 (nickname to username)
+=======
+        Список словарей с полями: nickname, best_points, first_played
+>>>>>>> e4441f8 (username to nickname)
     """
     db = get_db()
     query = """
     SELECT 
+<<<<<<< HEAD
 <<<<<<< HEAD
         u.nickname,
         MAX(s.points) as best_points,
@@ -79,15 +84,23 @@ def get_top_players(limit=10):
         u.username,
         MAX(s.points) as best_score,
 >>>>>>> f216a11 (уточнение ORDER BY для лидерборда (`best_points DESC, MIN(created_at) ASC`), CLI команда `flask init-db`)
+=======
+        u.nickname,
+        MAX(s.points) as best_points,
+>>>>>>> e4441f8 (username to nickname)
         MIN(s.created_at) as first_played
     FROM users u
     LEFT JOIN scores s ON u.id = s.user_id
     GROUP BY u.id
 <<<<<<< HEAD
+<<<<<<< HEAD
     ORDER BY best_points DESC, first_played ASC
 =======
     ORDER BY best_score DESC, first_played ASC
 >>>>>>> f216a11 (уточнение ORDER BY для лидерборда (`best_points DESC, MIN(created_at) ASC`), CLI команда `flask init-db`)
+=======
+    ORDER BY best_points DESC, first_played ASC
+>>>>>>> e4441f8 (username to nickname)
     LIMIT ?
     """
     rows = db.execute(query, (limit,)).fetchall()
