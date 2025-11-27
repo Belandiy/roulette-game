@@ -4,8 +4,6 @@ from flask import (
     request,
     jsonify,
     session,
-    redirect,
-    url_for,
     abort,
 )
 import random
@@ -41,53 +39,10 @@ def spin_logic():
     return result, points, combo
 
 
-@app.route("/", methods=["GET", "POST"])
-def home():
-    """
-    GET  -> отрисовать главную страницу.
-    POST -> принять никнейм из формы, создать/найти пользователя,
-            сохранить user_id в сессии и сделать редирект на '/'.
-    (Это нужно по ТЗ. Сейчас твой index.html формой не пользуется,
-    но маршрут уже готов под будущую верстку.)
-    """
-    if request.method == "POST":
-        nickname = request.form.get("nickname", "").strip()
-
-        if not nickname:
-            return render_template(
-                "index.html",
-                error="Введите никнейм",
-                nickname=session.get("nickname"),
-            )
-
-        conn = db.get_db()
-
-        # ВАЖНО: в schema.sql колонка называется username, а не nickname
-        cur = conn.execute(
-            "SELECT id FROM users WHERE username = ?",
-            (nickname,),
-        )
-        row = cur.fetchone()
-
-        if row is None:
-            cur = conn.execute(
-                "INSERT INTO users (username) VALUES (?)",
-                (nickname,),
-            )
-            conn.commit()
-            user_id = cur.lastrowid
-        else:
-            user_id = row["id"]
-
-        session["user_id"] = user_id
-        session["nickname"] = nickname
-
-        # редирект по ТЗ
-        return redirect(url_for("home"))
-
-    # для текущей версии index.html переменная nickname не используется,
-    # но пусть будет — пригодится, когда верстальщик допилит шаблон
-    return render_template("index.html", nickname=session.get("nickname"))
+@app.route("/")
+def index():
+    """Отображает главную страницу."""
+    return render_template("index.html")
 
 
 @app.route("/rules")
