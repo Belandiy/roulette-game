@@ -1,19 +1,37 @@
 {% extends "base.html" %}
-
-{% block title %}Играть — Roulette MVP{% endblock %}
-
 {% block content %}
-  <h1>Roulette (MVP)</h1>
+<div class="row">
+    <div class="card" style="flex:2 1 380px;">
+        <h2>Игра</h2>
+        <div style="margin:12px 0;">
+            <label>Никнейм</label><br>
+            <input type="text" name="nickname" placeholder="Player123">
+            <button class="btn" type="submit">Сохранить</button>
+        </div>
+        <div class="reels" aria-live="polite">
+            <div class="reel-wrap"><div class="reel">?</div></div>
+            <div class="reel-wrap"><div class="reel">?</div></div>
+            <div class="reel-wrap"><div class="reel">?</div></div>
+        </div>
+        <button id="spin-btn" class="btn">Крутить</button>
+        <div class="status" id="status"></div>
 
-  <label>Nickname:
-    <input id="nick" type="text" placeholder="Player1" />
-  </label>
+        <!-- ИЗМЕНЕНО: id="points" -> id="result-score" -->
+        <p>Очки за спин: <strong id="result-score">0</strong></p>
 
-  <button id="spin-btn">Крутить</button>
+        <!-- ИЗМЕНЕНО: id="best" -> id="best-points" -->
+        <p>Ваш лучший результат: <strong id="best-points">0</strong></p>
+    </div>
 
-  <section id="result" style="margin-top:16px;">
-    <div><strong>Результат:</strong> <span id="result-values">—</span></div>
-    <div><strong>Очки:</strong> <span id="result-score">—</span></div>
-    <div><strong>Комбо:</strong> <span id="result-combo">—</span></div>
-  </section>
+    <div class="card" style="flex:1 1 260px;">
+        <h2>ТОП-10</h2>
+        <table class="table">
+            <!-- ИЗМЕНЕНО: Убрали <th>#</th>, так как новый JS заполняет только Ник и Очки -->
+            <thead><tr><th>Ник</th><th>Очки</th></tr></thead>
+
+            <!-- ИЗМЕНЕНО: id="leaderboard-body" -> id="leaderboard-list" -->
+            <tbody id="leaderboard-list"></tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}
