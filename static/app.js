@@ -63,6 +63,9 @@ document.addEventListener("DOMContentLoaded", () => {
         pointsEl.textContent = data.score;
         statusEl.textContent = `Комбинация: ${data.combo}`;
 
+        // После спина обновляем таблицу лидеров, так как очки могли измениться
+        await loadLeaderboard(); 
+
         // Поле 'best-points' пока не обновляем, так как API бэкендера
         // не возвращает соответствующее значение.
 
