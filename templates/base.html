@@ -1,11 +1,11 @@
 <!doctype html>
 <html lang="ru">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>{% block title %}Roulette MVP{% endblock %}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  
+  <header>
+    <nav>
+      <a href="{{ url_for('home') }}">Играть</a> |
+      <a href="{{ url_for('rules') }}">Правила</a>
+    </nav>
+  </header>
 </head>
 <body>
   <header>
@@ -19,7 +19,7 @@
     {% block content %}{% endblock %}
   </main>
 
-  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>
