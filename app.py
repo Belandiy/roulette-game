@@ -40,7 +40,7 @@ def spin_logic():
 
 
 @app.route("/")
-def index():
+def home():
     """Отображает главную страницу."""
     return render_template("index.html")
 
