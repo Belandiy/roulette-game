@@ -8,22 +8,25 @@
     <div class="card main-card">
         <h2>Игровой автомат: Рулетка</h2>
 
-        <!-- НАЧАЛО ИЗМЕНЕНИЙ: Проверка авторизации -->
-        {% if nickname %}
-        <!-- Вариант 1: Пользователь уже вошел -->
-        <div class="form-horizontal" style="margin-bottom: 1em;">
-            <span class="form-label">Никнейм:</span>
-            <strong style="font-size: 1.2em; margin-left: 10px;">{{ nickname }}</strong>
-        </div>
-        {% else %}
-        <!-- Вариант 2: Пользователь не вошел, показываем форму -->
         <form id="nickname-form" class="form-horizontal">
             <label for="nickname" class="form-label">Никнейм:</label>
-            <input type="text" id="nickname" name="nickname" class="form-input" placeholder="Player123">
-            <button type="submit" class="btn">Сохранить</button>
+
+            <!--
+              ИЗМЕНЕНИЕ: Атрибут value.
+              Если nickname передан с сервера, он подставится в поле.
+              Пользователь увидит свой ник и сможет его стереть/изменить.
+            -->
+            <input type="text" id="nickname" name="nickname" class="form-input"
+                   placeholder="Player123"
+                   value="{{ nickname if nickname else '' }}">
+
+            <!--
+              ИЗМЕНЕНИЕ: Текст кнопки меняется в зависимости от состояния
+            -->
+            <button type="submit" class="btn">
+                {% if nickname %} Сменить {% else %} Сохранить {% endif %}
+            </button>
         </form>
-        {% endif %}
-        <!-- КОНЕЦ ИЗМЕНЕНИЙ -->
 
         <button id="spin-btn" class="btn" style="margin-bottom:1em;">Крутить</button>
         <div id="status"></div>
