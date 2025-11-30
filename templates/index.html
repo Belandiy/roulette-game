@@ -4,53 +4,65 @@
 
 {% block content %}
 <div class="row">
-  <!-- Игровая зона -->
-  <div class="card main-card">
-    <h2>Игровой автомат: Рулетка</h2>
+    <!-- Игровая зона -->
+    <div class="card main-card">
+        <h2>Игровой автомат: Рулетка</h2>
 
-    <form id="nickname-form" class="form-horizontal">
-      <label for="nickname" class="form-label">Никнейм:</label>
-      <input type="text" id="nickname" name="nickname" class="form-input" placeholder="Player123">
-      <button type="submit" class="btn">Сохранить</button>
-    </form>
-     <button id="spin-btn" class="btn" style="margin-bottom:1em;">Крутить</button>
-    <div id="status"></div>
-    <div class="game-display">
-      <div class="rolled">
-        <span class="rolled-label">Выпало: </span>
-        <span id="result-values">🍒 - 🍋 - ⭐</span>
-      </div>
-      <div class="combo-row">
-        <span>Комбо: <span id="result-combo">—</span></span>
-      </div>
-      <div class="score-row">
-        <span>Очки за спин: <strong id="result-score">0</strong></span>
-        <span>Ваш лучший результат: <strong id="best-points">0</strong></span>
-      </div>
+        <!-- НАЧАЛО ИЗМЕНЕНИЙ: Проверка авторизации -->
+        {% if nickname %}
+        <!-- Вариант 1: Пользователь уже вошел -->
+        <div class="form-horizontal" style="margin-bottom: 1em;">
+            <span class="form-label">Никнейм:</span>
+            <strong style="font-size: 1.2em; margin-left: 10px;">{{ nickname }}</strong>
+        </div>
+        {% else %}
+        <!-- Вариант 2: Пользователь не вошел, показываем форму -->
+        <form id="nickname-form" class="form-horizontal">
+            <label for="nickname" class="form-label">Никнейм:</label>
+            <input type="text" id="nickname" name="nickname" class="form-input" placeholder="Player123">
+            <button type="submit" class="btn">Сохранить</button>
+        </form>
+        {% endif %}
+        <!-- КОНЕЦ ИЗМЕНЕНИЙ -->
+
+        <button id="spin-btn" class="btn" style="margin-bottom:1em;">Крутить</button>
+        <div id="status"></div>
+        <div class="game-display">
+            <div class="rolled">
+                <span class="rolled-label">Выпало: </span>
+                <span id="result-values">🍒 - 🍋 - ⭐</span>
+            </div>
+            <div class="combo-row">
+                <span>Комбо: <span id="result-combo">—</span></span>
+            </div>
+            <div class="score-row">
+                <span>Очки за спин: <strong id="result-score">0</strong></span>
+                <span>Ваш лучший результат: <strong id="best-points">0</strong></span>
+            </div>
+        </div>
+
+        <div class="reels">
+            <div class="reel">🍒</div>
+            <div class="reel">🍋</div>
+            <div class="reel">⭐</div>
+        </div>
     </div>
 
-    <div class="reels">
-      <div class="reel">🍒</div>
-      <div class="reel">🍋</div>
-      <div class="reel">⭐</div>
+    <!-- ТОП-10 -->
+    <div class="card board-card">
+        <h2>Таблица лидеров</h2>
+        <table class="table leaderboard-table">
+            <thead>
+                <tr>
+                    <th>Ник</th>
+                    <th>Очки</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-list">
+                <!-- Данные игроков -->
+            </tbody>
+        </table>
     </div>
-  </div>
-
-  <!-- ТОП-10 -->
-  <div class="card board-card">
-    <h2>Таблица лидеров</h2>
-    <table class="table leaderboard-table">
-      <thead>
-        <tr>
-          <th>Ник</th>
-          <th>Очки</th>
-        </tr>
-      </thead>
-      <tbody id="leaderboard-list">
-        <!-- Данные игроков -->
-      </tbody>
-    </table>
-  </div>
 </div>
 <div id="toast" class="toast"></div>
 {% endblock %}
