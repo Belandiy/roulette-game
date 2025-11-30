@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify, session, redirect, u
 import random
 import json
 import db
+import scoring
 
 app = Flask(__name__)
 app.secret_key = 'dev_key_sprint_2'  # Временный ключ для сессий
@@ -60,21 +61,22 @@ def api_register():
 def api_spin():
     """
     Вращение рулетки и сохранение результата.
+    Использует scoring.py для генерации результата и подсчета очков.
     Request JSON:
       { "nickname": "Player1" }  # без поля bet
     Response JSON:
       { 
         "user_id": 1,
         "nickname":"Player1",
-        "result":[1,2,3],
+        "result":["🍒","🍋","⭐"],  # символы из scoring.py
         "score":0,
         "combo":"none",
         "best_score": 100,
         "animation": {
           "reels": [
-            {"final": 1, "spins": 3, "duration": 0.6},
-            {"final": 2, "spins": 4, "duration": 0.8},
-            {"final": 3, "spins": 5, "duration": 1.0}
+            {"final": 0, "spins": 3, "duration": 0.6},
+            {"final": 1, "spins": 4, "duration": 0.8},
+            {"final": 2, "spins": 5, "duration": 1.0}
           ],
           "total_duration": 1.2
         }
@@ -88,19 +90,19 @@ def api_spin():
     nickname = session.get('nickname', 'anonymous')
     database = db.get_db()
 
-    # Генерация результата (серверная сторона — честно)
-    result = [random.randint(0, 9) for _ in range(3)]
-
-    # Логика очков
+    # Генерация результата через scoring.py (серверная сторона — честно)
+    result = scoring.spin_reels(3)
+    
+    # Вычисление очков через scoring.py
+    score = scoring.score(result)
+    
+    # Определение типа комбинации
     if result[0] == result[1] == result[2]:
         combo = "three_of_kind"
-        score = 100
     elif len(set(result)) == 2:
         combo = "pair"
-        score = 20
     else:
         combo = "none"
-        score = 0
 
     # Сохраняем результат в БД
     reels_json = json.dumps(result)
@@ -118,9 +120,11 @@ def api_spin():
     best_score = best_score_row['best'] if best_score_row and best_score_row['best'] else 0
 
     # Данные для анимации вращения барабанов
+    # Используем индексы символов для анимации (для совместимости с фронтендом)
+    symbol_to_index = {"🍒": 0, "🍋": 1, "⭐": 2, "🔔": 3, "7️⃣": 4}
     animation = {
         "reels": [
-            {"final": result[i], "spins": random.randint(3, 5), "duration": 0.6 + i * 0.2}
+            {"final": symbol_to_index.get(result[i], 0), "spins": random.randint(3, 5), "duration": 0.6 + i * 0.2}
             for i in range(3)
         ],
         "total_duration": 1.2
