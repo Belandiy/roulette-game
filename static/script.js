@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btn = document.getElementById('spin-btn');
   if (!btn) return;
   btn.addEventListener('click', async () => {
-    const nick = document.getElementById('nick').value || 'anonymous';
+    const nick = document.getElementById('nickname').value || 'anonymous';
     btn.disabled = true;
     btn.textContent = 'Крутим...';
     try {
