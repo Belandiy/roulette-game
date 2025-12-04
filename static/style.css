@@ -1,22 +1,180 @@
 body {
-    font-family: Arial, sans-serif; 
-    padding: 20px; 
-    line-height: 1.4;
+    margin: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f3f4f7;
+    color: #222;
 }
+
+header {
+    background: #3367d1;
+    color: #fff;
+    padding: 12px 0;
+}
+
 nav {
-    margin-bottom: 12px;
+    display: flex;
+    gap: 24px;
+    justify-content: center;
 }
+nav a {
+    color: #fff;
+    text-decoration: none;
+    padding: 0 10px;
+    font-weight: 500;
+    transition: text-decoration .2s;
+}
+nav a:hover {
+    text-decoration: underline;
+}
+
+main {
+    padding: 32px 0;
+    min-height: 70vh;
+}
+
+footer {
+    background: #3367d1;
+    color: #fff;
+    text-align: center;
+    padding: 10px 0;
+    font-size: 0.9em;
+    margin-top:24px;
+}
+
+.row {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.card {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 16px #3367d112;
+    padding: 32px 22px;
+    margin-bottom: 16px;
+    flex: 1 1 280px;
+    min-width:220px;
+}
+
+.main-card { min-width:350px; flex: 2 1 360px; }
+.board-card { min-width:220px; flex: 1 1 250px; }
+
+.reels {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    margin:18px 0;
+}
+.reel {
+    font-size: 2em;
+    background: #f3f3fc;
+    border-radius: 8px;
+    padding: 22px 18px;
+    box-shadow: 0 2px 8px #0001;
+}
+.reel.spin {
+    animation: spin 0.5s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotateX(0deg); }
+    100% { transform: rotateX(360deg); }
+}
+
+#leaderboard-list {
+    list-style: decimal;
+    padding-left: 24px;
+    margin: 0;
+}
+#leaderboard-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    border-bottom: 1px solid #ececec;
+}
+
 input {
-    margin: 0 8px 0 4px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    border: 1px solid #c4c7cc;
+    margin-right:10px;
+    background: #fafdff;
+    font-size:1em;
+}
+.form-label {
+  font-size: 1.05em;
+  margin-bottom: 7px;
+  display:block;
+  color: #224488;
 }
 button {
-    margin-left: 8px;
-    padding: 6px 12px;
+    background: #3367d1;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-size: 1em;
+    cursor: pointer;
+    margin-top:8px;
+}
+button:hover {
+    background: #2653a6;
+}
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1em;
+    margin-top: 10px;
+}
+.table th, .table td {
+    padding: 6px 6px;
+    border-bottom: 1px solid #ececec;
+}
+.table th {
+    background: #ecf0fa;
+    font-weight: 600;
+}
+.toast {
+    display: none;
+    position: fixed;
+    bottom: 38px;
+    right: 36px;
+    background: #ffeec8;
+    color: #654;
+    padding: 16px 24px;
+    border-radius: 10px;
+    box-shadow: 0 4px 32px #0002;
+    min-width: 160px;
+    z-index: 99;
 }
 #result {
-    margin-top: 12px;
-    background:#f7f7f7;
-    padding:8px;
-    border-radius:6px;
-    width:320px;
+    margin-bottom: 18px;
+  padding: 10px 14px;
+  background: #f3f7fc;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px #3367d122;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.rolled-label {
+  font-weight: 500;
+  color: #2255aa;
+}
+.combo-row {
+  color: #007c47;
+  font-size: 1.1em;
+  margin-top: 6px;
+}
+.score-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-top: 6px;
+}
+.leaderboard-table tbody tr.me {
+  background: #dde8fd;
+  font-weight: 600;
 }
