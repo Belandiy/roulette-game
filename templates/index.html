@@ -3,17 +3,55 @@
 {% block title %}Играть — Roulette MVP{% endblock %}
 
 {% block content %}
-  <h1>Roulette (MVP)</h1>
+  <div class="row">
+  <!-- Игровая зона -->
+  <div class="card main-card">
+    <h2>Игровой автомат: Рулетка</h2>
 
-  <label>Nickname:
-    <input id="nick" type="text" placeholder="Player1" />
-  </label>
+  <form id="nickname-form" class="form-horizontal">
+      <label for="nickname" class="form-label">Никнейм:</label>
+      <input type="text" id="nickname" name="nickname" class="input" placeholder="Player123">
+      <button type="submit" class="button">Сохранить</button>
+    </form>
 
-  <button id="spin-btn">Крутить</button>
+  <button id="spin-btn" class="button" style="margin-bottom:1em;">Крутить</button>
 
-  <section id="result" style="margin-top:16px;">
-    <div><strong>Результат:</strong> <span id="result-values">—</span></div>
-    <div><strong>Очки:</strong> <span id="result-score">—</span></div>
-    <div><strong>Комбо:</strong> <span id="result-combo">—</span></div>
-  </section>
+  <div id="status"></div>
+    <div class="game-display">
+      <div class="rolled">
+        <span class="rolled-label">Выпало: </span>
+        <span id="result-values">🍒 - 🍋 - ⭐</span>
+      </div>
+      <div class="combo-row">
+        <span>Комбо: <span id="result-combo">—</span></span>
+      </div>
+      <div class="score-row">
+        <span>Очки за спин: <strong id="result-score">0</strong></span>
+        <span>Ваш лучший результат: <strong id="best-points">0</strong></span>
+      </div>
+    </div>
+    <div class="reels">
+      <div class="reel">🍒</div>
+      <div class="reel">🍋</div>
+      <div class="reel">⭐</div>
+    </div>
+  </div>
+
+  <!-- ТОП-10 -->
+  <div class="card board-card">
+    <h2>Таблица лидеров</h2>
+    <table class="table leaderboard-table">
+      <thead>
+        <tr>
+          <th>Ник</th>
+          <th>Очки</th>
+        </tr>
+      </thead>
+      <tbody id="leaderboard-list">
+        <!-- Данные игроков -->
+      </tbody>
+    </table>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
 {% endblock %}
