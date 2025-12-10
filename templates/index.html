@@ -1,37 +1,71 @@
 {% extends "base.html" %}
+
+{% block title %}Roulette MVP{% endblock %}
+
 {% block content %}
 <div class="row">
-    <div class="card" style="flex:2 1 380px;">
-        <h2>Игра</h2>
-        <div style="margin:12px 0;">
-            <label>Никнейм</label><br>
-            <input type="text" name="nickname" placeholder="Player123">
-            <button class="btn" type="submit">Сохранить</button>
-        </div>
-        <div class="reels" aria-live="polite">
-            <div class="reel-wrap"><div class="reel">?</div></div>
-            <div class="reel-wrap"><div class="reel">?</div></div>
-            <div class="reel-wrap"><div class="reel">?</div></div>
-        </div>
-        <button id="spin-btn" class="btn">Крутить</button>
-        <div class="status" id="status"></div>
+    <!-- Игровая зона -->
+    <div class="card main-card">
+        <h2>Игровой автомат: Рулетка</h2>
 
-        <!-- ИЗМЕНЕНО: id="points" -> id="result-score" -->
-        <p>Очки за спин: <strong id="result-score">0</strong></p>
+        <form id="nickname-form" class="form-horizontal">
+            <label for="nickname" class="form-label">Никнейм:</label>
 
-        <!-- ИЗМЕНЕНО: id="best" -> id="best-points" -->
-        <p>Ваш лучший результат: <strong id="best-points">0</strong></p>
+            <!--
+              ИЗМЕНЕНИЕ: Атрибут value.
+              Если nickname передан с сервера, он подставится в поле.
+              Пользователь увидит свой ник.
+            -->
+            <input type="text" id="nickname" name="nickname" class="form-input"
+                   placeholder="Player123"
+                   value="{{ nickname if nickname else '' }}">
+
+            <!--
+              ИЗМЕНЕНИЕ: Текст кнопки меняется в зависимости от состояния
+            -->
+            <button type="submit" class="btn">
+                {% if nickname %} Сменить {% else %} Сохранить {% endif %}
+            </button>
+        </form>
+
+        <button id="spin-btn" class="btn" style="margin-bottom:1em;">Крутить</button>
+        <div id="status"></div>
+        <div class="game-display">
+            <div class="rolled">
+                <span class="rolled-label">Выпало: </span>
+                <span id="result-values">🍒 - 🍋 - ⭐</span>
+            </div>
+            <div class="combo-row">
+                <span>Комбо: <span id="result-combo">—</span></span>
+            </div>
+            <div class="score-row">
+                <span>Очки за спин: <strong id="result-score">0</strong></span>
+                <span>Ваш лучший результат: <strong id="best-points">0</strong></span>
+            </div>
+        </div>
+
+        <div class="reels">
+            <div class="reel">🍒</div>
+            <div class="reel">🍋</div>
+            <div class="reel">⭐</div>
+        </div>
     </div>
 
-    <div class="card" style="flex:1 1 260px;">
-        <h2>ТОП-10</h2>
-        <table class="table">
-            <!-- ИЗМЕНЕНО: Убрали <th>#</th>, так как новый JS заполняет только Ник и Очки -->
-            <thead><tr><th>Ник</th><th>Очки</th></tr></thead>
-
-            <!-- ИЗМЕНЕНО: id="leaderboard-body" -> id="leaderboard-list" -->
-            <tbody id="leaderboard-list"></tbody>
+    <!-- ТОП-10 -->
+    <div class="card board-card">
+        <h2>Таблица лидеров</h2>
+        <table class="table leaderboard-table">
+            <thead>
+                <tr>
+                    <th>Ник</th>
+                    <th>Очки</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-list">
+                <!-- Данные игроков -->
+            </tbody>
         </table>
     </div>
 </div>
+<div id="toast" class="toast"></div>
 {% endblock %}
