@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify, session
 import random
+import json
 import db
 
 app = Flask(__name__)
@@ -18,8 +19,11 @@ def rules():
 @app.route("/api/spin", methods=["POST"])
 def api_spin():
     """
+    Крутить рулетку и сохранить результат в БД.
+    
     Request JSON:
-      { "nickname": "Player1" }  # без поля bet
+      { "nickname": "Player1" }
+    
     Response JSON:
       { "nickname":"Player1", "result":[1,2,3], "score":0, "combo":"none" }
     """
@@ -39,6 +43,35 @@ def api_spin():
     else:
         combo = "none"
         score = 0
+
+    # Сохраняем результат в БД
+    database = db.get_db()
+    
+    # Получаем или создаём пользователя
+    cursor = database.execute(
+        "SELECT id FROM users WHERE nickname = ?",
+        (nickname,)
+    )
+    user = cursor.fetchone()
+    
+    if user:
+        user_id = user[0]
+    else:
+        # Создаём нового пользователя
+        database.execute(
+            "INSERT INTO users (nickname) VALUES (?)",
+            (nickname,)
+        )
+        database.commit()
+        user_id = database.lastrowid
+    
+    # Сохраняем результат игры
+    import json
+    database.execute(
+        "INSERT INTO scores (user_id, points, reels_json) VALUES (?, ?, ?)",
+        (user_id, score, json.dumps(result))
+    )
+    database.commit()
 
     return jsonify({
         "nickname": nickname,
