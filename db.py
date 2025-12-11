@@ -1,5 +1,7 @@
 import sqlite3
 from flask import g
+import click
+from flask.cli import with_appcontext
 
 DATABASE = "database.db"
 
@@ -50,7 +52,40 @@ def close_db(e=None):
         db.close()
 
 
+def get_top_players(limit=10):
+    """Получить топ игроков по лучшему результату для лидерборда.
+    
+    Args:
+        limit: максимальное количество игроков (по умолчанию 10)
+    
+    Returns:
+        Список словарей с полями: nickname, best_points, first_played
+    """
+    db = get_db()
+    query = """
+    SELECT 
+        u.nickname,
+        MAX(s.points) as best_points,
+        MIN(s.created_at) as first_played
+    FROM users u
+    LEFT JOIN scores s ON u.id = s.user_id
+    GROUP BY u.id
+    ORDER BY best_points DESC, first_played ASC
+    LIMIT ?
+    """
+    rows = db.execute(query, (limit,)).fetchall()
+    return [dict(row) for row in rows]
+
+
 def init_app(app):
-    """Регистрация хуков приложения Flask для корректной работы с БД."""
+    """Регистрация хуков приложения Flask для корректной работы с БД.
+    Регистрирует teardown для закрытия соединений и CLI команду init-db."""
     # Закрываем соединение после запроса
     app.teardown_appcontext(close_db)
+
+    @app.cli.command('init-db')
+    @with_appcontext
+    def init_db_command():
+        """Инициализировать базу данных по schema.sql"""
+        init_db()
+        click.echo('Initialized the database.')
