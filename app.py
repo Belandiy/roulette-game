@@ -1,7 +1,11 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session
 import random
+import db
 
 app = Flask(__name__)
+app.secret_key = 'dev_key_sprint_2'  # Временный ключ для сессий
+
+db.init_app(app)
 
 @app.route("/")
 def home():
@@ -43,5 +47,21 @@ def api_spin():
         "combo": combo
     }), 200
 
+@app.route("/api/leaderboard")
+def api_leaderboard():
+    """
+    Заглушка для турнирной таблицы
+    """
+    # Возвращаем фиктивные данные
+    leaderboard = [
+        {"nickname": "Player1", "best_score": 100},
+        {"nickname": "Player2", "best_score": 50},
+        {"nickname": "Player3", "best_score": 20}
+    ]
+    
+    return jsonify(leaderboard), 200
+
 if __name__ == "__main__":
+    with app.app_context(): # Инициализация БД пр старте
+        db.ensure_db()
     app.run(host="127.0.0.1", port=5000, debug=True)
