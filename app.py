@@ -1,67 +1,84 @@
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 import random
-import db
+
+# (СПРИНТ 3)
+# Реальная логика БД и подсчета очков находится в PR бэкенд-разработчика.
+# Здесь только имитируем ответы API, чтобы проверить работу JS.
+# При соиянии реального бэкенда этот файл не нужен.
 
 app = Flask(__name__)
-app.secret_key = 'dev_key_sprint_2'  # Временный ключ для сессий
+app.secret_key = 'frontend_testing_key'
 
-db.init_app(app)
+
+# db.init_app(app) 
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    # Важно: передаем nickname, чтобы проверить скрытие формы в HTML
+    return render_template("index.html", nickname=session.get("nickname"))
 
 @app.route("/rules")
 def rules():
     return render_template("rules.html")
 
+@app.route("/api/register", methods=["POST"])
+def api_register():
+    """
+    Имитация регистрации.
+    Вместо записи в БД просто сохраняем в сессию и делаем редирект.
+    """
+    data = request.get_json(silent=True) or {}
+    nickname = data.get("nickname", "Player")
+    
+    # Имитируем успешный вход
+    session['user_id'] = 999 
+    session['nickname'] = nickname
+    
+    # Бэкендер сделал редирект, мы повторяем это поведение
+    return redirect(url_for('home'))
+
 @app.route("/api/spin", methods=["POST"])
 def api_spin():
     """
-    Request JSON:
-      { "nickname": "Player1" }  # без поля bet
-    Response JSON:
-      { "nickname":"Player1", "result":[1,2,3], "score":0, "combo":"none" }
+    Имитация спина с анимацией.
+    Возвращаем структуру данных, которую ожидает новый app.js.
     """
-    data = request.get_json(silent=True) or {}
-    nickname = data.get("nickname", "anonymous")
-
-    # Генерация результата (серверная сторона — честно)
-    result = [random.randint(0, 9) for _ in range(3)]
-
-    # Простая логика очков без ставки
-    if result[0] == result[1] == result[2]:
-        combo = "three_of_kind"
-        score = 100
-    elif len(set(result)) == 2:
-        combo = "pair"
-        score = 20
-    else:
-        combo = "none"
-        score = 0
+    # Проверка авторизации (чтобы протестировать ошибку 401 на фронте)
+    if not session.get('user_id'):
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    # Генерируем индексы символов (0-4), как это делает реальный бэкенд
+    result_indices = [random.randint(0, 4) for _ in range(3)]
+    
+    # Фейковая анимация для проверки JS
+    animation = {
+        "reels": [
+            {"final": result_indices[0], "spins": 3, "duration": 1.0},
+            {"final": result_indices[1], "spins": 4, "duration": 1.4},
+            {"final": result_indices[2], "spins": 5, "duration": 1.8}
+        ],
+        "total_duration": 1.8
+    }
 
     return jsonify({
-        "nickname": nickname,
-        "result": result,
-        "score": score,
-        "combo": combo
+        "nickname": session.get("nickname"),
+        "result": result_indices, # JS ждет индексы
+        "score": random.choice([0, 10, 50, 100]), # Случайные очки
+        "combo": "test_combo",
+        "best_score": 999, # Фейковый рекорд для проверки UI
+        "animation": animation # Данные для анимации
     }), 200
 
 @app.route("/api/leaderboard")
 def api_leaderboard():
     """
-    Заглушка для турнирной таблицы
+    Имитация данных лидерборда с правильными полями (best_score)
     """
-    # Возвращаем фиктивные данные
-    leaderboard = [
-        {"nickname": "Player1", "best_score": 100},
-        {"nickname": "Player2", "best_score": 50},
-        {"nickname": "Player3", "best_score": 20}
-    ]
-    
-    return jsonify(leaderboard), 200
+    return jsonify([
+        {"nickname": "Leader1", "best_score": 5000},
+        {"nickname": "Leader2", "best_score": 3000},
+        {"nickname": "Leader3", "best_score": 1500}
+    ])
 
 if __name__ == "__main__":
-    with app.app_context(): # Инициализация БД пр старте
-        db.ensure_db()
     app.run(host="127.0.0.1", port=5000, debug=True)
