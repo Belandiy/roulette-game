@@ -58,12 +58,12 @@ def api_spin():
         user_id = user[0]
     else:
         # Создаём нового пользователя
-        database.execute(
+        insert_cursor = database.execute(
             "INSERT INTO users (nickname) VALUES (?)",
             (nickname,)
         )
         database.commit()
-        user_id = database.lastrowid
+        user_id = insert_cursor.lastrowid
     
     # Сохраняем результат игры
     import json
