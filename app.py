@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify, session
 import random
+import json
 import db
 
 app = Flask(__name__)
@@ -18,8 +19,11 @@ def rules():
 @app.route("/api/spin", methods=["POST"])
 def api_spin():
     """
+    Крутить рулетку и сохранить результат в БД.
+    
     Request JSON:
-      { "nickname": "Player1" }  # без поля bet
+      { "nickname": "Player1" }
+    
     Response JSON:
       { "nickname":"Player1", "result":[1,2,3], "score":0, "combo":"none" }
     """
@@ -40,6 +44,35 @@ def api_spin():
         combo = "none"
         score = 0
 
+    # Сохраняем результат в БД
+    database = db.get_db()
+    
+    # Получаем или создаём пользователя
+    cursor = database.execute(
+        "SELECT id FROM users WHERE nickname = ?",
+        (nickname,)
+    )
+    user = cursor.fetchone()
+    
+    if user:
+        user_id = user[0]
+    else:
+        # Создаём нового пользователя
+        insert_cursor = database.execute(
+            "INSERT INTO users (nickname) VALUES (?)",
+            (nickname,)
+        )
+        database.commit()
+        user_id = insert_cursor.lastrowid
+    
+    # Сохраняем результат игры
+    import json
+    database.execute(
+        "INSERT INTO scores (user_id, points, reels_json) VALUES (?, ?, ?)",
+        (user_id, score, json.dumps(result))
+    )
+    database.commit()
+
     return jsonify({
         "nickname": nickname,
         "result": result,
@@ -50,14 +83,17 @@ def api_spin():
 @app.route("/api/leaderboard")
 def api_leaderboard():
     """
-    Заглушка для турнирной таблицы
+    Получить турнирную таблицу ТОП-10 игроков.
+    Сортировка: лучший результат DESC, время первой игры ASC.
+    
+    Returns:
+        JSON список игроков с полями:
+        - nickname: имя игрока
+        - best_points: лучший результат
+        - first_played: дата первой игры
     """
-    # Возвращаем фиктивные данные
-    leaderboard = [
-        {"nickname": "Player1", "best_score": 100},
-        {"nickname": "Player2", "best_score": 50},
-        {"nickname": "Player3", "best_score": 20}
-    ]
+    # Получаем топ-10 игроков из БД с правильной сортировкой
+    leaderboard = db.get_top_players(limit=10)
     
     return jsonify(leaderboard), 200
 
