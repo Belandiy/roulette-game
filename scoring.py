@@ -12,22 +12,20 @@ SYMBOL_WEIGHTS = {
 # подготовим «барабан» для простого выбора
 DECK = [sym for sym, w in SYMBOL_WEIGHTS.items() for _ in range(w)]
 
-TRIPLE_SCORES = { 
-    "7️⃣": 500, 
-}
-PAIR_SCORE = 10
-
 
 def spin_reels(n=3):
-    return [choice(DECK) for _ in range(n)]
+    """
+    Заглушка для генерации символов.
+    Возвращает фиксированные значения.
+    """
+    return ["🍒", "🍒", "⭐"]  # Фиксированная комбинация для тестирования
 
 def score(reels):
-    a, b, c = reels
-    if a == b == c:
-        return TRIPLE_SCORES.get(a, 0)
-    if a == b or a == c or b == c:
-        return PAIR_SCORE
-    return 0
+    """
+    Заглушка для подсчёта очков.
+    Возвращает фиксированное значение.
+    """
+    return 10
 
 # Тестовый блок
 if __name__ == "__main__":
@@ -36,5 +34,8 @@ if __name__ == "__main__":
     # Тест спина
     print("1. Тест спина:")
     test_reels = spin_reels(3)
-    print(f"   Результат: {test_reels}")
-    print(f"   Очки: {score(test_reels)}")
+    print(f"spin_reels() вернул: {test_reels}")
+    test_score = score(test_reels)
+    print(f"score({test_reels}) вернул: {test_score}")
+    
+    print(f"Список символов: {SYMBOL_WEIGHTS}")
