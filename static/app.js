@@ -12,6 +12,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const statusEl = document.getElementById("status");
     const leaderboardEl = document.getElementById("leaderboard-list");
 
+    const comboEl = document.getElementById("result-combo");
+
     // Элементы для регистрации (Новое в Спринте 3)
     const nicknameForm = document.getElementById("nickname-form");
     const nickInput = document.getElementById("nickname");
@@ -24,7 +26,16 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
 
             const nickname = nickInput.value.trim();
-            if (!nickname) return;
+
+            // ПАРСИНГ/ВАЛИДАЦИЯ: Проверяем, что ник нормальный
+            // Разрешаем: Латиница, Кириллица, Цифры, _ -
+            // Длина: 3-16 символов
+            const nickRegex = /^[a-zA-Zа-яА-Я0-9_\-]{3,16}$/;
+
+            if (!nickRegex.test(nickname)) {
+                alert("Никнейм должен содержать от 3 до 16 символов: буквы, цифры, _ или -");
+                return;
+            }
 
             try {
                 const response = await fetch("/api/register", {
@@ -65,8 +76,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
             data.forEach((row) => {
                 const tr = document.createElement("tr");
-                // В Спринте 3 данные реальные, формат тот же: nickname, best_score
-                tr.innerHTML = `<td>${row.nickname}</td><td>${row.best_score}</td>`;
+
+                const tdNick = document.createElement("td");
+                tdNick.textContent = row.nickname;
+
+                const tdScore = document.createElement("td");
+                tdScore.textContent = row.best_points;
+
+                tr.appendChild(tdNick);
+                tr.appendChild(tdScore);
                 leaderboardEl.appendChild(tr);
             });
         } catch (error) {
@@ -101,7 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
         spinBtn.addEventListener("click", async () => {
             spinBtn.disabled = true;
             statusEl.textContent = "Вращение...";
-            statusEl.style.color = "#9ad0ff"; // Цвет статуса (опционально)
+            statusEl.style.color = "#9ad0ff";
 
             try {
                 const response = await fetch("/api/spin", { method: "POST" });
@@ -135,11 +153,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
 
                 pointsEl.textContent = data.score;
-                statusEl.textContent = `Комбинация: ${data.combo}`;
-                statusEl.style.color = ""; // Сброс цвета
+                // Пишем комбинацию в специальное поле
+                if (comboEl) comboEl.textContent = data.combo;
+                // Статус просто очищаем или пишем "Готово"
+                statusEl.textContent = "";
 
                 // Теперь обновляем лучший результат (данные реальные)
-                bestEl.textContent = data.best_score;
+                bestEl.textContent = data.best_points;
 
                 // Обновляем таблицу лидеров
                 await loadLeaderboard();
