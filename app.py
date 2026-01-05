@@ -1,3 +1,5 @@
+import os
+import re
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 import random
 import json
@@ -5,14 +7,17 @@ import db
 import scoring
 
 app = Flask(__name__)
-app.secret_key = 'dev_key_sprint_2'  # Временный ключ для сессий
+app.secret_key = os.environ.get('SECRET_KEY', 'fallback-dev-key-for-development')
+
+# Строгое регулярное выражение для валидации никнейма (спринт 4)
+# Разрешаем только: латинские буквы, кириллицу, цифры, подчеркивание и дефис
+NICKNAME_PATTERN = re.compile(r'^[a-zA-Zа-яА-Я0-9_-]{3,20}$')
 
 db.init_app(app)
 
 @app.route("/")
 def home():
     return render_template("index.html", nickname=session.get("nickname"))
-    return render_template("index.html")
 
 @app.route("/rules")
 def rules():
@@ -22,15 +27,50 @@ def rules():
 def api_register():
     """
     Регистрация нового пользователя или получение существующего по никнейму.
-    Request JSON:
-      { "nickname": "Player1" }
-    Response: редирект на главную страницу после успешной регистрации
     """
-    data = request.get_json(silent=True) or {}
-    nickname = data.get("nickname", "").strip()
+    # Пытаемся получить данные в формате JSON
+    data = request.get_json(silent=True)
     
-    if not nickname or len(nickname) < 1 or len(nickname) > 50:
-        return jsonify({"error": "Nickname must be between 1 and 50 characters"}), 400
+    if data is None:
+        # Если это не JSON, пробуем получить из формы
+        nickname = request.form.get("nickname", "").strip()
+    else:
+        nickname = data.get("nickname", "").strip()
+    
+    # Строгая валидация никнейма (спринт 4)
+    if not nickname:
+        return jsonify({"error": "Никнейм не может быть пустым"}), 400
+    
+    # Проверка длины
+    if len(nickname) < 3:
+        return jsonify({"error": "Никнейм должен содержать минимум 3 символа"}), 400
+    if len(nickname) > 20:
+        return jsonify({"error": "Никнейм должен содержать максимум 20 символов"}), 400
+    
+    # Проверка по regexp
+    if not NICKNAME_PATTERN.fullmatch(nickname):
+        # Находим запрещенные символы для информативного сообщения
+        forbidden_chars = []
+        for char in nickname:
+            if not re.match(r'[a-zA-Zа-яА-Я0-9_-]', char):
+                if char not in forbidden_chars:
+                    forbidden_chars.append(char)
+        
+        if forbidden_chars:
+            error_msg = f"Никнейм содержит запрещенные символы: {', '.join(forbidden_chars)}. "
+            error_msg += "Разрешены только буквы (латинские и русские), цифры, подчеркивание (_) и дефис (-)."
+        else:
+            error_msg = "Никнейм содержит недопустимые символы. Разрешены только буквы (латинские и русские), цифры, подчеркивание (_) и дефис (-)."
+        
+        return jsonify({"error": error_msg}), 400
+    
+    # Проверка на только цифры
+    if nickname.isdigit():
+        return jsonify({"error": "Никнейм не может состоять только из цифр"}), 400
+    
+    # Проверка на только знаки препинания
+    if all(c in '_-' for c in nickname):
+        return jsonify({"error": "Никнейм не может состоять только из знаков препинания"}), 400
     
     database = db.get_db()
     
@@ -42,6 +82,7 @@ def api_register():
     
     if user:
         user_id = user[0]
+        message = "Пользователь уже существует"
     else:
         # Создаём нового пользователя
         cursor = database.execute(
@@ -50,43 +91,30 @@ def api_register():
         )
         database.commit()
         user_id = cursor.lastrowid
+        message = "Пользователь успешно зарегистрирован"
     
-    # Сохраняем в сессию
+    # Сохраняем в сессии
     session['user_id'] = user_id
     session['nickname'] = nickname
     
-    # Редирект после успешной регистрации
-    return redirect(url_for('home'))
+    # Для API-запросов возвращаем JSON
+    return jsonify({
+        "success": True,
+        "message": message,
+        "user_id": user_id,
+        "nickname": nickname
+    }), 200
 
 @app.route("/api/spin", methods=["POST"])
 def api_spin():
     """
     Вращение рулетки и сохранение результата.
     Использует scoring.py для генерации результата и подсчета очков.
-    Request JSON:
-      { "nickname": "Player1" }  # без поля bet
-    Response JSON:
-      { 
-        "user_id": 1,
-        "nickname":"Player1",
-        "result":["🍒","🍋","⭐"],  # символы из scoring.py
-        "score":0,
-        "combo":"none",
-        "best_score": 100,
-        "animation": {
-          "reels": [
-            {"final": 0, "spins": 3, "duration": 0.6},
-            {"final": 1, "spins": 4, "duration": 0.8},
-            {"final": 2, "spins": 5, "duration": 1.0}
-          ],
-          "total_duration": 1.2
-        }
-      }
     """
     # Проверяем наличие пользователя в сессии
     user_id = session.get('user_id')
     if not user_id:
-        return jsonify({"error": "Unauthorized. Register first."}), 401
+        return jsonify({"error": "Неавторизован. Сначала зарегистрируйтесь."}), 401
     
     nickname = session.get('nickname', 'anonymous')
     database = db.get_db()
@@ -113,15 +141,54 @@ def api_spin():
     )
     database.commit()
 
-    # Получаем лучший результат пользователя
-    best_score_row = database.execute(
-        "SELECT MAX(points) as best FROM scores WHERE user_id = ?",
+    # Получаем лучший результат пользователя (спринт 4: переименовано в best_points)
+    best_points_row = database.execute(
+        "SELECT COALESCE(MAX(points), 0) as best FROM scores WHERE user_id = ?",
         (user_id,)
     ).fetchone()
-    best_score = best_score_row['best'] if best_score_row and best_score_row['best'] else 0
+    best_points = best_points_row['best'] if best_points_row else 0
+
+    # Вычисление ранга пользователя (спринт 4)
+    total_users_row = database.execute("SELECT COUNT(*) as total FROM users").fetchone()
+    total_users = total_users_row['total'] if total_users_row else 0
+    
+    # Получаем ранг пользователя (сколько пользователей имеют лучший результат)
+    if total_users > 0:
+        rank_row = database.execute(
+            """
+            SELECT COUNT(*) + 1 as rank
+            FROM (
+                SELECT u.id, COALESCE(MAX(s.points), 0) as user_best
+                FROM users u
+                LEFT JOIN scores s ON u.id = s.user_id
+                GROUP BY u.id
+                HAVING user_best > ?
+            )
+            """,
+            (best_points,)
+        ).fetchone()
+        rank = rank_row['rank'] if rank_row else 1
+    else:
+        rank = 1
+    
+    # Формируем подсказку ранга (спринт 4)
+    if total_users > 0:
+        if rank <= 10:
+            rank_hint = f"#{rank} (в топ-10!)"
+        elif rank <= 50:
+            rank_hint = f"#{rank} (в топ-50)"
+        elif rank <= 100:
+            rank_hint = f"#{rank} (в топ-100)"
+        else:
+            percentile = min(99, int((rank / total_users) * 100))
+            if percentile < 10:
+                rank_hint = f"#{rank} (в топ-{percentile+1}%)"
+            else:
+                rank_hint = f"#{rank} (в топ-{percentile}%)"
+    else:
+        rank_hint = f"#{rank} (первый игрок!)"
 
     # Данные для анимации вращения барабанов
-    # Используем индексы символов для анимации (для совместимости с фронтендом)
     symbol_to_index = {"🍒": 0, "🍋": 1, "⭐": 2, "🔔": 3, "7️⃣": 4}
     animation = {
         "reels": [
@@ -139,7 +206,10 @@ def api_spin():
         "result": result_indices,
         "score": score,
         "combo": combo,
-        "best_score": best_score,
+        "best_points": best_points,
+        "rank_hint": rank_hint,
+        "rank": rank,
+        "total_users": total_users,
         "animation": animation
     }), 200
 
@@ -148,12 +218,6 @@ def api_leaderboard():
     """
     Получение турнирной таблицы ТОП-10.
     Агрегация: MAX(points) по каждому пользователю.
-    Response JSON:
-      [
-        {"user_id": 1, "nickname": "Player1", "best_score": 100},
-        {"user_id": 2, "nickname": "Player2", "best_score": 50},
-        ...
-      ]
     """
     database = db.get_db()
     
@@ -162,11 +226,11 @@ def api_leaderboard():
         SELECT 
             u.id as user_id,
             u.username as nickname,
-            MAX(s.points) as best_score
+            COALESCE(MAX(s.points), 0) as best_points
         FROM users u
         LEFT JOIN scores s ON u.id = s.user_id
         GROUP BY u.id
-        ORDER BY best_score DESC, u.created_at ASC
+        ORDER BY best_points DESC, MIN(s.created_at) ASC, u.created_at ASC
         LIMIT 10
         """
     ).fetchall()
@@ -176,19 +240,97 @@ def api_leaderboard():
         {
             "user_id": row['user_id'],
             "nickname": row['nickname'],
-            "best_score": row['best_score'] if row['best_score'] else 0
+            "best_points": row['best_points']
         }
         for row in leaderboard
     ]
     
     return jsonify(result), 200
 
-if __name__ == "__main__":
-    with app.app_context(): # Инициализация БД пр старте
-        db.ensure_db()
-    app.run(host="127.0.0.1", port=5000, debug=True)
+@app.route("/api/health")
+def health_check():
+    """Health-check эндпоинт для мониторинга (спринт 4)"""
+    try:
+        db.get_db().execute("SELECT 1")
+        return jsonify({
+            "status": "healthy",
+            "database": "connected",
+            "version": "1.0.0",
+            "endpoints": {
+                "register": "/api/register",
+                "spin": "/api/spin", 
+                "leaderboard": "/api/leaderboard",
+                "health": "/api/health"
+            }
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "status": "unhealthy",
+            "database": "disconnected",
+            "error": str(e)
+        }), 500
+
+@app.cli.command("init-db")
+def init_db_command():
+    """CLI команда для инициализации БД (спринт 4) - идемпотентная версия"""
+    db.ensure_db()
+    print("База данных проверена/инициализирована.")
+
+@app.cli.command("reset-db")
+def reset_db_command():
+    """CLI команда для полного сброса БД (только для разработки)"""
+    confirmation = input("Вы уверены? Это удалит все данные. (y/N): ")
+    if confirmation.lower() == 'y':
+        db.init_db()
+        print("База данных полностью сброшена.")
+    else:
+        print("Операция отменена.")
+
+@app.errorhandler(400)
+def bad_request(error):
+    """Обработчик ошибки 400 Bad Request"""
+    return jsonify({
+        "error": "Некорректный запрос",
+        "message": "Проверьте формат и данные запроса"
+    }), 400
 
 @app.errorhandler(401)
 def unauthorized(error):
     """Обработчик ошибки 401 Unauthorized"""
-    return jsonify({"error": "Unauthorized"}), 401
+    return jsonify({
+        "error": "Неавторизован",
+        "message": "Сначала зарегистрируйтесь или войдите в систему"
+    }), 401
+
+@app.errorhandler(404)
+def not_found(error):
+    """Обработчик ошибки 404 Not Found"""
+    return jsonify({
+        "error": "Ресурс не найден",
+        "message": "Запрашиваемый URL не существует"
+    }), 404
+
+@app.errorhandler(405)
+def method_not_allowed(error):
+    """Обработчик ошибка 405 Method Not Allowed"""
+    return jsonify({
+        "error": "Метод не разрешен",
+        "message": "Используйте правильный HTTP-метод для этого эндпоинта"
+    }), 405
+
+@app.errorhandler(500)
+def internal_error(error):
+    """Обработчик ошибки 500 Internal Server Error"""
+    import traceback
+    print(f"Внутренняя ошибка сервера: {error}")
+    print(traceback.format_exc())
+    return jsonify({
+        "error": "Внутренняя ошибка сервера",
+        "message": "Произошла непредвиденная ошибка. Попробуйте позже."
+    }), 500
+
+if __name__ == "__main__":
+    with app.app_context():
+        # Инициализация БД при старте (идемпотентно)
+        db.ensure_db()
+    app.run(host="127.0.0.1", port=5000, debug=True)
