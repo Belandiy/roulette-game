@@ -76,7 +76,7 @@ def api_register():
     
     # Пытаемся найти существующего пользователя
     user = database.execute(
-        "SELECT id FROM users WHERE username = ?",
+        "SELECT id FROM users WHERE nickname = ?",  # ИСПРАВЛЕНО: username → nickname
         (nickname,)
     ).fetchone()
     
@@ -86,7 +86,7 @@ def api_register():
     else:
         # Создаём нового пользователя
         cursor = database.execute(
-            "INSERT INTO users (username) VALUES (?)",
+            "INSERT INTO users (nickname) VALUES (?)",  # ИСПРАВЛЕНО: username → nickname
             (nickname,)
         )
         database.commit()
@@ -225,7 +225,7 @@ def api_leaderboard():
         """
         SELECT 
             u.id as user_id,
-            u.username as nickname,
+            u.nickname as nickname, 
             COALESCE(MAX(s.points), 0) as best_points
         FROM users u
         LEFT JOIN scores s ON u.id = s.user_id
