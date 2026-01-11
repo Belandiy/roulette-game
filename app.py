@@ -11,8 +11,8 @@ db.init_app(app)
 
 @app.route("/")
 def home():
+    # Передаем никнейм в шаблон, если пользователь в сессии
     return render_template("index.html", nickname=session.get("nickname"))
-    return render_template("index.html")
 
 @app.route("/rules")
 def rules():
@@ -139,7 +139,7 @@ def api_spin():
         "result": result_indices,
         "score": score,
         "combo": combo,
-        "best_score": best_score,
+        "best_points": best_score,  # Переименовано с best_score на best_points для совместимости с фронтендом
         "animation": animation
     }), 200
 
@@ -176,7 +176,7 @@ def api_leaderboard():
         {
             "user_id": row['user_id'],
             "nickname": row['nickname'],
-            "best_score": row['best_score'] if row['best_score'] else 0
+            "best_points": row['best_score'] if row['best_score'] else 0  # Переименовано на best_points для совместимости с фронтендом
         }
         for row in leaderboard
     ]

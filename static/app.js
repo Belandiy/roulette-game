@@ -1,35 +1,40 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // === (Спринт 3) ===
-    // Бэкенд теперь присылает числа (0-4), мапим их в эмодзи
     const SYMBOLS = ["🍒", "🍋", "⭐", "🔔", "7️⃣"];
 
-    // 1. Инициализация DOM
+    // === 1. Инициализация DOM ===
     const spinBtn = document.getElementById("spin-btn");
 
-    // Элементы игры (используем те же ID, что и в Спринте 2)
     const pointsEl = document.getElementById("result-score");
     const bestEl = document.getElementById("best-points");
     const statusEl = document.getElementById("status");
     const leaderboardEl = document.getElementById("leaderboard-list");
-
     const comboEl = document.getElementById("result-combo");
 
-    // Элементы для регистрации (Новое в Спринте 3)
     const nicknameForm = document.getElementById("nickname-form");
     const nickInput = document.getElementById("nickname");
 
     const reels = [...document.querySelectorAll(".reel")];
 
-    // 2. Логика регистрации (Спринт 3)
+    // === ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (Refactor Sprint 4) ===
+
+    // Управление статусом: сообщение и тип (обычный/ошибка)
+    function setStatus(message, isError = false) {
+        statusEl.textContent = message;
+        if (isError) {
+            statusEl.style.color = "#ff4444"; // Красный для ошибок
+        } else {
+            statusEl.style.color = ""; // Сброс (наследуется из CSS или дефолт)
+        }
+    }
+
+    // === 2. Логика регистрации ===
     if (nicknameForm) {
         nicknameForm.addEventListener("submit", async (e) => {
             e.preventDefault();
 
             const nickname = nickInput.value.trim();
 
-            // ПАРСИНГ/ВАЛИДАЦИЯ: Проверяем, что ник нормальный
-            // Разрешаем: Латиница, Кириллица, Цифры, _ -
-            // Длина: 3-16 символов
+            // Валидация (RegExp из Sprint 4 бэкенда может быть строже, проверяем и тут)
             const nickRegex = /^[a-zA-Zа-яА-Я0-9_\-]{3,16}$/;
 
             if (!nickRegex.test(nickname)) {
@@ -44,8 +49,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     body: JSON.stringify({ nickname: nickname })
                 });
 
-                // Бэкенд возвращает редирект или успех. Перезагружаем страницу, 
-                // чтобы сервер увидел сессию и пустил в игру.
                 if (response.ok) {
                     window.location.reload();
                 } else {
@@ -53,11 +56,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             } catch (error) {
                 console.error("Login error:", error);
+                alert("Нет связи с сервером.");
             }
         });
     }
 
-    // 3. Функция для загрузки лидерборда
+    // === 3. Функция для загрузки лидерборда ===
     async function loadLeaderboard() {
         try {
             const response = await fetch("/api/leaderboard");
@@ -65,12 +69,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const data = await response.json();
 
-            // console.log("Leaderboard data received:", data); 
-
             leaderboardEl.innerHTML = "";
 
             if (data.length === 0) {
-                leaderboardEl.innerHTML = "<tr><td colspan='2'>Нет данных</td></tr>";
+                leaderboardEl.innerHTML = "<tr><td colspan='2' style='text-align:center; color:#888;'>Пока нет рекордов</td></tr>";
                 return;
             }
 
@@ -89,24 +91,22 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         } catch (error) {
             console.error("Failed to load leaderboard:", error);
+            leaderboardEl.innerHTML = "<tr><td colspan='2' style='color:#ff4444;'>Ошибка загрузки</td></tr>";
         }
     }
 
-    // 4. Функция анимации барабана (Спринт 3)
+    // 4. Функция анимации барабана
     function animateReel(reelElement, finalSymbolIndex, durationSeconds) {
         return new Promise((resolve) => {
             const startTime = performance.now();
             const durationMs = durationSeconds * 1000;
 
-            // Меняем символы каждые 50мс
             const interval = setInterval(() => {
                 const randomSymbol = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
                 reelElement.textContent = randomSymbol;
 
-                // Если время вышло, останавливаемся
                 if (performance.now() - startTime >= durationMs) {
                     clearInterval(interval);
-                    // Ставим финальный символ (превращаем число от бэкенда в картинку)
                     reelElement.textContent = SYMBOLS[finalSymbolIndex];
                     resolve();
                 }
@@ -118,54 +118,63 @@ document.addEventListener("DOMContentLoaded", () => {
     if (spinBtn) {
         spinBtn.addEventListener("click", async () => {
             spinBtn.disabled = true;
-            statusEl.textContent = "Вращение...";
-            statusEl.style.color = "#9ad0ff";
+            setStatus("Вращение...", false); // Очистка статуса перед спином
 
             try {
                 const response = await fetch("/api/spin", { method: "POST" });
 
-                // Обработка ошибки авторизации (Спринт 3)
+                // UX: Обработка 401 (Сессия истекла или не вошел)
                 if (response.status === 401) {
-                    statusEl.textContent = "Сначала введите никнейм и сохраните!";
-                    statusEl.style.color = "red";
+                    setStatus("Для игры необходимо ввести никнейм и нажать 'Сохранить'", true);
                     spinBtn.disabled = false;
                     return;
                 }
 
-                const data = await response.json(); // {result: [0,1,0], score: 100, animation: {...}, ...}
+                // UX: Обработка других ошибок сервера (500 и т.д.)
+                if (!response.ok) {
+                    setStatus("Ошибка сервера. Попробуйте позже.", true);
+                    spinBtn.disabled = false;
+                    return;
+                }
 
-                // Запускаем анимацию (Спринт 3)
-                // Бэкенд присылает настройки анимации для каждого барабана
+                const data = await response.json();
+
+                // Анимация (Бэкенд присылает duration для каждого барабана)
                 const animations = reels.map((reel, i) => {
                     const duration = data.animation ? data.animation.reels[i].duration : 1.0;
                     const finalIndex = data.animation ? data.animation.reels[i].final : 0;
                     return animateReel(reel, finalIndex, duration);
                 });
 
-                // Ждем окончания всех анимаций
                 await Promise.all(animations);
 
-                // Обновляем результаты ПОСЛЕ анимации
-                // Для надежности ставим финальные символы из result
+                // --- Обновление UI после остановки ---
+
+                // Гарантированная установка финальных символов
                 reels.forEach((reel, index) => {
                     const symbolIdx = data.result[index];
                     reel.textContent = SYMBOLS[symbolIdx];
                 });
 
                 pointsEl.textContent = data.score;
-                // Пишем комбинацию в специальное поле
                 if (comboEl) comboEl.textContent = data.combo;
-                // Статус просто очищаем или пишем "Готово"
-                statusEl.textContent = "";
 
-                // Теперь обновляем лучший результат (данные реальные)
                 bestEl.textContent = data.best_points;
 
-                // Обновляем таблицу лидеров
-                await loadLeaderboard();
+                // UX: Обработка Rank Hint (Фича Спринта 4 от Бэкенда)
+                if (data.rank_hint) {
+                    setStatus(`🎉 Вы в ТОП-10! Позиция: ${data.rank_hint}`, false);
+                    statusEl.style.color = "#00ff00"; // Зеленый для успеха
+                } else {
+                    setStatus(""); // Очищаем, если ничего особенного
+                }
+
+                setTimeout(() => {
+                    loadLeaderboard();
+                }, 500);
 
             } catch (error) {
-                statusEl.textContent = "Ошибка сети";
+                setStatus("Ошибка сети / Интернет недоступен", true);
                 console.error("Spin error:", error);
             } finally {
                 spinBtn.disabled = false;
