@@ -109,8 +109,13 @@ def api_register():
 @app.route("/api/spin", methods=["POST"])
 def api_spin():
     """
-    Вращение рулетки и сохранение результата.
-    Использует scoring.py для генерации результата и подсчета очков.
+    Крутить рулетку и сохранить результат в БД.
+    
+    Request JSON:
+      { "nickname": "Player1" }
+    
+    Response JSON:
+      { "nickname":"Player1", "result":[1,2,3], "score":0, "combo":"none" }
     """
     # Проверяем наличие пользователя в сессии
     user_id = session.get('user_id')
@@ -201,6 +206,35 @@ def api_spin():
 
     result_indices = [symbol_to_index.get(sym, 0) for sym in result]
 
+    # Сохраняем результат в БД
+    database = db.get_db()
+    
+    # Получаем или создаём пользователя
+    cursor = database.execute(
+        "SELECT id FROM users WHERE nickname = ?",
+        (nickname,)
+    )
+    user = cursor.fetchone()
+    
+    if user:
+        user_id = user[0]
+    else:
+        # Создаём нового пользователя
+        insert_cursor = database.execute(
+            "INSERT INTO users (nickname) VALUES (?)",
+            (nickname,)
+        )
+        database.commit()
+        user_id = insert_cursor.lastrowid
+    
+    # Сохраняем результат игры
+    import json
+    database.execute(
+        "INSERT INTO scores (user_id, points, reels_json) VALUES (?, ?, ?)",
+        (user_id, score, json.dumps(result))
+    )
+    database.commit()
+
     return jsonify({
         "user_id": user_id,
         "nickname": nickname,
@@ -217,34 +251,17 @@ def api_spin():
 @app.route("/api/leaderboard")
 def api_leaderboard():
     """
-    Получение турнирной таблицы ТОП-10.
-    Агрегация: MAX(points) по каждому пользователю.
+    Получить турнирную таблицу ТОП-10 игроков.
+    Сортировка: лучший результат DESC, время первой игры ASC.
+    
+    Returns:
+        JSON список игроков с полями:
+        - nickname: имя игрока
+        - best_points: лучший результат
+        - first_played: дата первой игры
     """
-    database = db.get_db()
-    
-    leaderboard = database.execute(
-        """
-        SELECT 
-            u.id as user_id,
-            u.nickname as nickname, 
-            COALESCE(MAX(s.points), 0) as best_points
-        FROM users u
-        LEFT JOIN scores s ON u.id = s.user_id
-        GROUP BY u.id
-        ORDER BY best_points DESC, MIN(s.created_at) ASC, u.created_at ASC
-        LIMIT 10
-        """
-    ).fetchall()
-    
-    # Преобразуем в список словарей
-    result = [
-        {
-            "user_id": row['user_id'],
-            "nickname": row['nickname'],
-            "best_points": row['best_points']
-        }
-        for row in leaderboard
-    ]
+    # Получаем топ-10 игроков из БД с правильной сортировкой
+    leaderboard = db.get_top_players(limit=10)
     
     return jsonify(result), 200
 
