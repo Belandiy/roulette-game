@@ -17,6 +17,7 @@ db.init_app(app)
 
 @app.route("/")
 def home():
+    # Передаем никнейм в шаблон, если пользователь в сессии
     return render_template("index.html", nickname=session.get("nickname"))
 
 @app.route("/rules")
